@@ -4,85 +4,56 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StockMarket {
-
-    private double price;
-    private String name;
-    private double bid;
-    private int metric;
-
+    private List<Stock> stockList = new ArrayList<>();
+    private static StockMarket instance;
     private StockMarket() {
-        super();
     }
 
-    public static StockMarket getInstance() {
-        StockMarket instance = new StockMarket();
+    public static synchronized StockMarket getInstance()
+    {
+        if (instance == null)
+        {
+            instance = new StockMarket();
+        }
         return instance;
     }
-    public StockMarket(String name, double price, double bid, int metric) {
-        super();
-        this.name = name;
-        this.price = price;
-        this.bid = bid;
-        this.metric = metric;
+
+    public void AddStock(ArrayList<Stock> stockList) {
+        this.stockList = stockList;
     }
-    public String getName() {
-        return name;
+
+    public void DeleteStock(Stock stock) {
+        stockList.remove(stock);
     }
-    public void setName(String name) {
-        this.name = name;
+
+    public Double getPrice(Stock stock) {
+        Double nPrice = 0.0;
+
+        Double prev = 0.0;
+        for (int i = 0; i < stock.getPreviousPrices().size(); i++) {
+            prev = prev + stock.getPreviousPrices().get(i);
+        }
+        nPrice = ((stock.getPreviousPrices().get(5) + (prev/stock.getPreviousPrices().size()))/2) + (6 * stock.getMetric());
+
+        return nPrice;
     }
-    public double getPrice() {
-        return price;
-    }
-    public void setPrice(double price) {
-        this.price = price;
-    }
-    public double getBid() {
-        return bid;
-    }
-    public void setBid(double bid) {
-        this.bid = bid;
-    }
-    public int getMetric() {
-        return metric;
-    }
-    public void setMetric(int metric) {
-        this.metric = metric;
+
+    public void TradeStock(ArrayList<Stock> stockList) {
+        for(Stock st : stockList){
+            int stockResult = st.getMetric();
+            double currentPrice = st.getPrice();
+            int numOfBids = st.getPreviousPrices().size();
+            st.setPrice(currentPrice + stockResult * numOfBids);
+        }
     }
 
     @Override
     public String toString() {
-        return "StockAPI{" +
-                "name='" + name + '\'' +
-                ", price=" + price +
-                ", bid=" + bid +
-                ", metric="+getMetric()+
-                '}';
-    }
-    public void addStock(){
-
-    }
-    public void removeStock(){
-
-    }
-    public void showStock(){
-
-    }
-    public void tradeStock(){
-
-    }
-    public static void demo() {
-        StockMarket amgen = Amgen.getObject();
-        {
-            amgen.setName("Amgen");
-            amgen.setPrice(1500.45);
-            amgen.setBid(1000.34);
-            amgen.setMetric(45);
+        StringBuilder stockInfo = new StringBuilder();
+        for(Stock st: stockList) {
+            stockInfo.append(st.toString());
+            stockInfo.append("Rating: ").append(st.getMetric()).append("\n");
         }
+        return stockInfo.toString();
     }
-
-    public StockMarket getObject(){
-
-    };
 }
-
